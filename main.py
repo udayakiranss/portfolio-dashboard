@@ -193,6 +193,26 @@ if __name__ == "__main__":
     indexes_to_fetch = get_index_symbols(config)
     output_file = get_output_file(config)
 
+    # Debug: Display loaded stocks and indexes
+    print(f"\n📋 Portfolio Configuration:")
+    print(f"   Portfolio: {config.get('portfolio_name', 'Unnamed')}")
+    print(f"   Output File: {output_file}")
+    
+    print(f"\n📈 Stocks to analyze ({len(stocks_to_fetch)} stocks):")
+    for stock in config.get('stocks', []):
+        symbol = stock.get('symbol', 'Unknown')
+        name = stock.get('name', 'Unknown')
+        category = stock.get('category', 'Unknown')
+        print(f"   • {symbol} - {name} ({category})")
+    
+    print(f"\n📊 Indexes to analyze ({len(indexes_to_fetch)} indexes):")
+    for index in config.get('indexes', []):
+        symbol = index.get('symbol', 'Unknown')
+        name = index.get('name', 'Unknown')
+        print(f"   • {symbol} - {name}")
+    
+    print(f"\n🚀 Starting data analysis...\n")
+
     for stock in stocks_to_fetch + indexes_to_fetch:
         print(f"📈 Fetching data for {stock}...")
         changes = get_price_changes(stock)
