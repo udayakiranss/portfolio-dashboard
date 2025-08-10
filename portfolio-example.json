@@ -1,0 +1,41 @@
+{
+  "portfolio_name": "Example Portfolio",
+  "description": "Example configuration - customize this for your own portfolio",
+  "stocks": [
+    {
+      "symbol": "AAPL",
+      "name": "Apple Inc",
+      "category": "Technology",
+      "description": "Consumer electronics and software"
+    },
+    {
+      "symbol": "MSFT",
+      "name": "Microsoft Corporation",
+      "category": "Technology",
+      "description": "Software and cloud services"
+    },
+    {
+      "symbol": "GOOGL",
+      "name": "Alphabet Inc",
+      "category": "Technology",
+      "description": "Internet services and advertising"
+    }
+  ],
+  "indexes": [
+    {
+      "symbol": "^GSPC",
+      "name": "S&P 500",
+      "description": "US large-cap stock market index"
+    },
+    {
+      "symbol": "^DJI",
+      "name": "Dow Jones Industrial Average",
+      "description": "US stock market index"
+    }
+  ],
+  "settings": {
+    "output_file": "My_Portfolio_Analysis.xlsx",
+    "data_period": "1y",
+    "interval": "1d"
+  }
+}

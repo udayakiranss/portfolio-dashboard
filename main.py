@@ -2,6 +2,8 @@ import yfinance as yf
 import pandas as pd
 from datetime import datetime
 import warnings
+import json
+import os
 
 # Suppress yfinance warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
@@ -9,21 +11,54 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 # --------------------------
 # CONFIGURATION
 # --------------------------
-STOCKS = [
-    "HDFCBANK.NS",
-    "RELIANCE.NS", 
-    "ICICIBANK.NS",
-    "BEL.NS",          # Bharat Electronics
-    "HAL.NS",          # Hindustan Aeronautics
-    "GOLDBEES.NS",     # Gold ETF (corrected from GOLDCHEM.NS)
-    "SILVERBEES.NS",
-    "TATAMOTORS.NS",
-    "BHARTIARTL.NS"
-]
+CONFIG_FILE = "portfolio.json"
 
-INDEXES = ["^NSEI", "^BSESN"]  # Nifty 50 & BSE Sensex (corrected from ^BSE500)
+def load_portfolio_config():
+    """Load portfolio configuration from JSON file"""
+    try:
+        if not os.path.exists(CONFIG_FILE):
+            print(f"❌ Configuration file '{CONFIG_FILE}' not found!")
+            print("Please create a portfolio.json file or check the file path.")
+            return None
+        
+        with open(CONFIG_FILE, 'r') as file:
+            config = json.load(file)
+        
+        print(f"✅ Loaded portfolio: {config.get('portfolio_name', 'Unnamed Portfolio')}")
+        print(f"📋 Description: {config.get('description', 'No description')}")
+        
+        return config
+        
+    except json.JSONDecodeError as e:
+        print(f"❌ Error parsing JSON file: {e}")
+        return None
+    except Exception as e:
+        print(f"❌ Error loading configuration: {e}")
+        return None
 
-OUTPUT_FILE = "Portfolio_Analysis.xlsx"
+def get_stock_symbols(config):
+    """Extract stock symbols from configuration"""
+    if not config:
+        return []
+    
+    stocks = config.get('stocks', [])
+    return [stock['symbol'] for stock in stocks]
+
+def get_index_symbols(config):
+    """Extract index symbols from configuration"""
+    if not config:
+        return []
+    
+    indexes = config.get('indexes', [])
+    return [index['symbol'] for index in indexes]
+
+def get_output_file(config):
+    """Get output file name from configuration"""
+    if not config:
+        return "Portfolio_Analysis.xlsx"
+    
+    settings = config.get('settings', {})
+    return settings.get('output_file', 'Portfolio_Analysis.xlsx')
 
 # --------------------------
 # FUNCTION: Fetch PE ratios
@@ -147,7 +182,18 @@ if __name__ == "__main__":
     print("📊 Starting Portfolio Analysis...")
     dashboard_data = []
 
-    for stock in STOCKS + INDEXES:
+    # Load configuration
+    config = load_portfolio_config()
+    if not config:
+        print("Exiting due to configuration error.")
+        exit()
+
+    # Get symbols from config
+    stocks_to_fetch = get_stock_symbols(config)
+    indexes_to_fetch = get_index_symbols(config)
+    output_file = get_output_file(config)
+
+    for stock in stocks_to_fetch + indexes_to_fetch:
         print(f"📈 Fetching data for {stock}...")
         changes = get_price_changes(stock)
         pe_data = get_pe_ratios(stock)
@@ -210,11 +256,11 @@ if __name__ == "__main__":
 
     # Save to Excel
     try:
-        with pd.ExcelWriter(OUTPUT_FILE, engine="xlsxwriter") as writer:
+        with pd.ExcelWriter(output_file, engine="xlsxwriter") as writer:
             dashboard_df.to_excel(writer, sheet_name="Dashboard", index=False)
             news_df.to_excel(writer, sheet_name="News Feed", index=False)
         
-        print(f"✅ Portfolio analysis saved to {OUTPUT_FILE}")
+        print(f"✅ Portfolio analysis saved to {output_file}")
         print(f"📋 Processed {len(dashboard_data)} stocks/indexes")
         
         # Display summary
